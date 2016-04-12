@@ -1,11 +1,9 @@
-tab = [[ 0, 0, 0, 0, 0, 0, 0],
-       [ 0, 0, 0, 0, 0, 0, 0],
-       [ 0, 0, 0, 0, 0, 0, 0],
-       [ 0, 0, 1, 1, 1, 0, 0],
-       [ 0, 0,-1, 1,-1,-1, 0],
-       [ 0,-1, 1,-1,-1, 1,-1]]
+tab = [[ 0, 0, 0, 0, 0],
+       [ 1, 1, 1, 0, 0],
+       [-1, 1,-1,-1, 0],
+       [ 1,-1,-1, 1,-1]]
        
-max_depth = 3
+max_depth = 10
 max_log = 0
 n = 0
     
@@ -48,7 +46,7 @@ def gameState(tab):
     			return -1
     		
     # optimization for empty cell
-    if tab[5][6] == 0:
+    if tab[len(tab)-1][len(tab[0])-1] == 0:
     	return -2
     # empty cell
     for i in range(len(tab)):
@@ -73,7 +71,7 @@ def search(tab, player, t):
     # list_best[0] contains best result and list_best[1:] moves to get this result
     list_best = [-2]
     for celly in range(len(tab[0])):
-        cellx = 5
+        cellx = len(tab)-1
         while tab[cellx][celly] != 0:
             cellx -= 1
             if cellx == 0:
@@ -84,6 +82,8 @@ def search(tab, player, t):
 			# val is best value found by one child call
             global n 
             n += 1
+            if n%1000 == 0:
+                print(n)
             val = -search(tab, - player, t + 1)[0]
 			
             if val > list_best[0]:
