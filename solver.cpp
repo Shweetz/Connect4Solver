@@ -186,11 +186,6 @@ vector<int> search(int player, int cellx, int celly, int t)
 	    list_best.push_back(celly);
     }
     
-    if (list_best[0] == 1)
-    {
-      return list_best;
-    }
-    
 		// reset tab
 		tab[cellx][celly] = 0;
     //if t < max_log:
