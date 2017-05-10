@@ -4,19 +4,31 @@
 
 using namespace std;
 
-int nbLig = 4;
+int nbLig = 5;
 int nbCol = 5;
 
-int tab[4][5] = 
+int tab[5][5] = 
   {{ 0, 0, 0, 0, 0},
+   { 0, 0, 0, 0, 0},
+   { 0, 0, 0, 0, 0},
+   { 0, 0, 0, 0, 0},
+   { 0, 0, 0, 0, 0}};
+   
+/*int tab[4][5] = 
+  {{ 0, 0, 1, 0, 0},
+   { 1, 0, 1,-1, 1},
+   {-1,-1,-1, 1,-1},
+   { 1, 1, 1,-1,-1}};*/
+
+/*int tab[4][5] = 
+  {{ 0, 0, 0, 0, 0},
+   { 0, 0, 0, 0, 0},
    { 0, 0, 1, 0, 0},
-   { 0,-1,-1, 0, 0},
-   { 0, 1, 1,-1, 0}};
-  
-// player 1 start: playerStarting = 1
-// player 2 start: playerStarting = -1
-int playerStarting = 1;
-     
+   {-1, 0, 1, 0,-1}};*/
+
+// 1: player 1 start, 0: player 2 start
+int playerStarting = 1; // 1 (P1) or 0 (P2)
+      
 int max_depth = 25;
 long n = 0;
 
@@ -119,16 +131,15 @@ int gameState(int cellx, int celly) {
 }
 
 // recursive method to check possibility branches
-vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
+vector<int> alphaBeta(int cellx, int celly, int t, int a, int b, bool playerMaxes)
 {
-	n += 1;
   vector<int> list_best;
   int max_log = 0;
 		
 	int state = gameState(cellx, celly);
 	if (state != -2)
 	{
-  	list_best[0] = state;
+  	list_best.push_back(state);
 		return list_best;
 	}
 	/*if (t > max_depth - 1)
@@ -145,7 +156,7 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
 	{
 	  //int v = -2;	
 	  list_best.clear();
-	  list_best[0] = -2;
+	  list_best.push_back(-2);
 	  
 	  for (int celly = 0; celly < nbCol; celly++)
   	{
@@ -158,10 +169,14 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
   			
   		// fill cell
   		tab[cellx][celly] = cellValue;
+  		//cout << "fill tab[" << cellx << "][" << celly << "] = " << cellValue << endl;
+  		
+    	n += 1;
+      //cout << "n: " << n << endl;
   
-  		//cout << "av search, n=" << n << endl;
-  		vector<int> list_child = search(cellx, celly, t + 1, a, b, false);
-  		//cout << "ap search, n=" << n << endl;
+  		//cout << "av search, list_best[0]=" << list_best[0] << endl;
+  		vector<int> list_child = alphaBeta(cellx, celly, t + 1, a, b, false);
+  		//cout << "ap search, list_child[0]=" << list_child[0] << endl;
   		
   		// reset cell
   		tab[cellx][celly] = 0;
@@ -170,16 +185,16 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
   		if (list_child[0] > list_best[0])
   		{
   	    list_best.clear();
-  	    list_best[0] = list_child[0];
-  	    list_best[1] = celly;
+  	    list_best.push_back(list_child[0]);
+  	    list_best.push_back(celly);
   		}
-  		else if (list_child[0] == list_best[0])
+  		/*else if (list_child[0] == list_best[0])
   		{
   	    list_best.push_back(celly);
-      }
+      }*/
       
       // alpha = max(v, alpha)
-      a = max(a, list_best[0]);
+      a = list_best[0] >= a ? list_best[0] : a;
       
       // break condition
       if (b <= a)
@@ -193,7 +208,7 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
 	{
 	  //int v = 2;	
 	  list_best.clear();
-	  list_best[0] = 2;
+	  list_best.push_back(2);
 	  
 	  for (int celly = 0; celly < nbCol; celly++)
   	{
@@ -208,7 +223,7 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
   		tab[cellx][celly] = cellValue;
   
   		//cout << "av search, n=" << n << endl;
-  		vector<int> list_child = search(cellx, celly, t + 1, a, b, true);
+  		vector<int> list_child = alphaBeta(cellx, celly, t + 1, a, b, true);
   		//cout << "ap search, n=" << n << endl;
   		
   		// reset cell
@@ -218,16 +233,16 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
   		if (list_child[0] < list_best[0])
   		{
   	    list_best.clear();
-  	    list_best[0] = list_child[0];
-  	    list_best[1] = celly;
+  	    list_best.push_back(list_child[0]);
+  	    list_best.push_back(celly);
   		}
-  		else if (list_child[0] == list_best[0])
+  		/*else if (list_child[0] == list_best[0])
   		{
   	    list_best.push_back(celly);
-      }
+      }*/
       
       // beta = min(v, beta)
-      b = min(b, list_best[0]);
+     b = list_best[0] <= b ? list_best[0] : b;
       
       // break condition
       if (b <= a)
@@ -241,19 +256,18 @@ vector<int> search(int cellx, int celly, int t, int a, int b, bool playerMaxes)
 
 int main() {
   // Start the recursive loop
-  vector<int> list_best = search(0, 0, 0, -2, 2, playerStarting);
+  vector<int> list_best = alphaBeta(0, 0, 0, -1, 1, playerStarting);
   
   // See who won: res[0] == -1 means playerStarting lost
   int winner = 10;
   if (list_best.size() > 0)
     winner = list_best.at(0);
   
-  cout << "winner: " << winner << endl;
   cout << "Number of branches explored: " << n << endl;
   // Print output
   if (playerStarting == 1)
   	cout << "Player 1 start." << endl;
-  else if (playerStarting == -1)
+  else if (playerStarting == 0)
   	cout << "Player 2 start." << endl;
   
   if (winner == 0)
@@ -261,7 +275,7 @@ int main() {
   else
   {
   	// winner_number does 1 -> 1 and -1 -> 2
-  	int winner_number = winner*-0.5 + 1.5;
+  	int winner_number = winner == 1 ? 1 : 2;
   	cout << "Player " << winner_number << " wins !" << endl;
   }
   
@@ -277,7 +291,14 @@ int main() {
         str_poss += ", " + to_string(list_best.at(i) + 1);
         i += 1;
     }
-    if (winner != -playerStarting)
+    if (winner != (playerStarting ? -1 : 1))
         cout << "You can play " << str_poss << endl;
   }
 }
+
+/*int tab[4][5] = 
+  {{-1, 1, 1,-1, 0},
+   { 1,-1, 1,-1, 1},
+   {-1,-1,-1, 1,-1},
+   { 1, 1, 1,-1,-1}};*/
+   
